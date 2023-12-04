@@ -8,6 +8,9 @@ import com.porvenirms.starwars.repository.StarwarsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 @Service
 public class StarWarsServiceImpl implements StarwarsService{
 
@@ -35,6 +38,26 @@ public class StarWarsServiceImpl implements StarwarsService{
         }
     }
 
+    @Override
+    public StarwarsDTO updateFilmDataBase(Integer id, StarwarsDTO dto) throws PorvenirBussinesException {
+        StarwarsEntity entity = repository.findById(id).orElseThrow(()->new PorvenirBussinesException(1,"Not found",404));
+        updateIfChange(dto.getTitle(),entity::setTitle);
+        updateIfChange(dto.getEpisode_id(),entity::setEpisode_id);
+        updateIfChange(dto.getRelease_date(),entity::setRelease_date);
+        StarwarsEntity entityOut = repository.save(entity);
+        return StarwarsDTO
+                .builder()
+                .title(entityOut.getTitle())
+                .release_date(entityOut.getRelease_date())
+                .episode_id(entityOut.getEpisode_id()).build();
+    }
+
+    private <T> void updateIfChange(T nuevoValor, Consumer<T> updater){
+        Optional.ofNullable(nuevoValor)
+                .filter(valor->!valor.equals(updater))
+                .ifPresent(updater);
+    }
+
     private StarwarsEntity buildEntity(String id) throws PorvenirBussinesException {
         SwapiFilm temp = swapiService.getFilm(id);
         StarwarsEntity entity = new StarwarsEntity();
@@ -44,7 +67,7 @@ public class StarWarsServiceImpl implements StarwarsService{
         StarwarsEntity entityOut = repository.save(entity);
         return entityOut;
     }
-    void validId(String id) {
+    private void validId(String id) {
         if (id == null) {
             throw new IllegalArgumentException("El ID no puede ser nulo");
         }
