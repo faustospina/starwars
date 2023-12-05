@@ -41,11 +41,20 @@ public class StarwarsController {
     private ResponseEntity buildResponse(PorvenirBussinesException response){
         ResponseEntity responseEntity = null;
         HttpStatus status = getHttpStatus(response.getStatus());
-        switch (status){
-            case NO_CONTENT -> responseEntity.noContent().build();
-            case BAD_REQUEST ->responseEntity = new ResponseEntity<>(response,status);
-            case NOT_FOUND -> responseEntity = new ResponseEntity<>(response,status);
+
+        switch (status) {
+            case NO_CONTENT:
+                responseEntity = ResponseEntity.noContent().build();
+                break;
+            case BAD_REQUEST:
+            case NOT_FOUND:
+                responseEntity = new ResponseEntity<>(response, status);
+                break;
+            default:
+                responseEntity = new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                break;
         }
+
         return responseEntity;
     }
 

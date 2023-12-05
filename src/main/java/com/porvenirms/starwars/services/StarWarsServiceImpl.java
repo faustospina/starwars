@@ -68,11 +68,16 @@ public class StarWarsServiceImpl implements StarwarsService{
         return entityOut;
     }
     private void validId(String id) {
+
+        String regex = "\\d+";
         if (id == null) {
             throw new IllegalArgumentException("El ID no puede ser nulo");
         }
         if (id.length() > 2) {
             throw new IllegalArgumentException("El ID no puede ser más largo que 2 caracteres");
+        }
+        if(!id.matches(regex)){
+            throw new IllegalArgumentException("El ID solo puede ser digitos");
         }
     }
 
